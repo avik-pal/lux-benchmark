@@ -20,12 +20,22 @@ interface G2 {
   [key: string]: G1
 }
 
+interface BenchmarkConfig {
+  id: string,
+  juliacmd: any,
+  env: Record<string, string>
+}
+
 interface BenchmarkResults {
   name: string,
-  benchmarkconfig: any,
+  benchmarkconfig: BenchmarkConfig,
   benchmarkgroup: BenchmarkGroup,
   vinfo: string,
   commit: string,
   julia_commit: string,
   date: string
+}
+
+interface BenchmarkData {
+  [key: string]: string
 }

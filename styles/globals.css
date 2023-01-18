@@ -98,3 +98,18 @@ body {
 .button:hover {
   color: #ddf
 }
+
+.context-picker {
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.context-picker select {
+  margin: 1rem;
+}
+
+.context-picker option {
+  font-size: 1rem;
+}
