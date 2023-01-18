@@ -1,9 +1,16 @@
 import Head from 'next/head';
 import { Chart, BarController, LineController, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Colors, LogarithmicScale, Title } from "chart.js";
+import type { FontSpec } from "chart.js"
 import { Bar, Line } from "react-chartjs-2";
 import useSWR from 'swr';
+import { Wrapper } from '@/components/Wrapper';
 
-Chart.register(BarController, LineController, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Colors, LogarithmicScale, Title );
+Chart.register(BarController, LineController, CategoryScale, LinearScale, LogarithmicScale, BarElement, LineElement, PointElement);
+Chart.register(Colors, Legend, Title, Tooltip);
+
+Chart.defaults.aspectRatio = 1.2;
+Chart.defaults.plugins.title.display = true;
+(Chart.defaults.plugins.title.font as FontSpec).size = 20;
 
 async function fetchSync<T>(key: string) {
   return await (await fetch(key)).json() as T;
@@ -18,20 +25,21 @@ type Suite = {
 
 const Charts = () => {
   const { data, error } = useSWR('/data?repo=TaylorDiff.jl', async key => await fetchSync<BenchmarkResults>(key));
-  if (error || !data) return <div>Error</div>;
+  if (error) return <div>Error</div>;
+  if (!data) return <div>Loading...</div>
   const {
-    scalar: { forwarddiff: scalar_fwd, taylordiff: scalar_taylor },
+    scalar: { forwarddiff: scalar_f, taylordiff: scalar_t },
     mlp: { forwarddiff: mlp_f, taylordiff: mlp_t },
-    taylor_expansion: { taylordiff, taylorseries },
-    pinn: { primal, gradient }
+    taylor_expansion: { taylordiff: te_t, taylorseries: te_s },
+    pinn: { taylordiff: pinn_t, finitediff: pinn_f }
   } = data.benchmarkgroup as Suite;
-  console.log(Object.entries(scalar_fwd));
+  console.log(Object.entries(scalar_f));
   return <div style={{display: "flex", flexWrap: 'wrap', justifyContent: 'space-around'}}>
-    <div className='chart-container'><Line data={{
-      labels: Object.keys(scalar_fwd),
+    <Wrapper url='https://github.com/JuliaDiff/TaylorDiff.jl/blob/main/benchmark/scalar.jl'><Line data={{
+      labels: Object.keys(scalar_f),
       datasets: [
-        { data: Object.values(scalar_fwd).map(x => x.time), label: "ForwardDiff" },
-        { data: Object.values(scalar_taylor).map(x => x.time), label: "TaylorDiff" }
+        { data: Object.values(scalar_f).map(x => x.time), label: "ForwardDiff.jl" },
+        { data: Object.values(scalar_t).map(x => x.time), label: "TaylorDiff.jl" }
       ]
     }} options={{
       scales: {
@@ -41,13 +49,13 @@ const Charts = () => {
           type: 'logarithmic'
         }
       },
-      plugins: { title: { text: "Scalar function higher-order derivatives", display: true } }
-    }}/></div>
-    <div className='chart-container'><Line data={{
+      plugins: { title: { text: "Scalar function derivatives", display: true } }
+    }}/></Wrapper>
+    <Wrapper url='https://github.com/JuliaDiff/TaylorDiff.jl/blob/main/benchmark/mlp.jl'><Line data={{
       labels: Object.keys(mlp_f),
       datasets: [
-        { data: Object.values(mlp_f).map(x => x.time), label: "ForwardDiff" },
-        { data: Object.values(mlp_t).map(x => x.time), label: "TaylorDiff" }
+        { data: Object.values(mlp_f).map(x => x.time), label: "ForwardDiff.jl" },
+        { data: Object.values(mlp_t).map(x => x.time), label: "TaylorDiff.jl" }
       ]
     }} options={{
       scales: {
@@ -57,12 +65,13 @@ const Charts = () => {
           type: 'logarithmic'
         }
       },
-      plugins: { title: { text: "Multi-layer Perceptron higher-order derivatives", display: true } }
-    }}/></div>
-    <div className='chart-container'><Bar data={{
-      labels: ['TaylorDiff.jl', 'TaylorSeries.jl'],
+      plugins: { title: { text: "Multi-layer Perceptron derivatives", display: true } }
+    }}/></Wrapper>
+    <Wrapper url='https://github.com/JuliaDiff/TaylorDiff.jl/blob/main/benchmark/taylor_expansion.jl'><Bar data={{
+      labels: ['Time'],
       datasets: [
-        { data: [taylordiff.time, taylorseries.time].map(x => x / 1000), label: "Time" }
+        { data: [te_s].map(x => x.time / 1000), label: "TaylorSeries.jl" },
+        { data: [te_t].map(x => x.time / 1000), label: "TaylorDiff.jl" },
       ],
     }} options={{
       scales: {
@@ -71,22 +80,22 @@ const Charts = () => {
         }
       },
       plugins: { title: { text: "Single variable Taylor expansion", display: true } }
-    }}/></div>
-    <div className='chart-container'><Bar data={{
-      labels: ['TaylorDiff.jl', 'Finite Differences'],
+    }}/></Wrapper>
+    <Wrapper url='https://github.com/JuliaDiff/TaylorDiff.jl/blob/main/benchmark/pinn.jl'><Bar data={{
+      labels: Object.keys(pinn_f),
       datasets: [
-        { data: [primal.taylordiff.time, primal.finitediff.time].map(x => x / 1000), label: "Primal" },
-        { data: [gradient.taylordiff.time, gradient.finitediff.time].map(x => x / 1000), label: "Gradient" },
+        { data: Object.values(pinn_f).map(x => x.time / 1000), label: "FiniteDifferences.jl" },
+        { data: Object.values(pinn_t).map(x => x.time / 1000), label: "TaylorDiff.jl" },
       ],
     }} options={{
       scales: {
         y: {
           title: { text: "Time / μs", display: true },
-          type: 'logarithmic',
+          // type: 'logarithmic',
         }
       },
       plugins: { title: { text: "PINN", display: true } }
-    }}/></div>
+    }}/></Wrapper>
   </div>
 }
 
@@ -99,7 +108,7 @@ export default function TaylorDiff_jl() {
       <link rel="icon" href="/favicon.ico" />
     </Head>
     <main style={{maxWidth: '1440px', margin: 'auto'}}>
-      <h1 style={{textAlign: 'center'}}>TaylorDiff.jl Benchmark Results</h1>
+      <h1 style={{textAlign: 'center'}}><a href="https://github.com/JuliaDiff/TaylorDiff.jl" target="_blank">TaylorDiff.jl</a> Benchmarks</h1>
       <Charts />
     </main>
   </>
