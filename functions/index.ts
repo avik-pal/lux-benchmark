@@ -1,11 +1,7 @@
 export const onRequestPut: PagesFunction<Env> = async (context) => {
-  const value = await context.request.json() as BenchmarkResults;
-  const [id] = value.name.split('/').slice(-1);
-  const branch = value.benchmarkconfig.id;
-  const commit = value.commit.slice(0, 7);
-  const key = `${id}#${branch}#${commit}`;
-  const alias = `${id}#${branch}`;
-  await context.env.BENCHMARK.put(key, JSON.stringify(value));
-  await context.env.BENCHMARK.put(alias, key);
+  const upload = await context.request.json() as BenchmarkUpload;
+  const { name, commit } = upload;
+  const key = `${name}#${commit}`;
+  await context.env.BENCHMARK.put(key, JSON.stringify(upload));
   return new Response(JSON.stringify({ success: true }));
 }

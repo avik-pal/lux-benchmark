@@ -3,7 +3,7 @@ import type { FontSpec } from "chart.js"
 import { Bar, Line } from "react-chartjs-2";
 import useSWR from 'swr';
 import { Wrapper } from '@/components/Wrapper';
-import { useState } from 'react';
+import { useState, PropsWithChildren } from 'react';
 import Head from "@/components/Head";
 
 Chart.register(BarController, LineController, CategoryScale, LinearScale, LogarithmicScale, BarElement, LineElement, PointElement);
@@ -24,7 +24,7 @@ type Suite = {
   pinn: G1
 }
 
-const id = 'TaylorDiff.jl';
+const name = 'TaylorDiff.jl', defaultBranch = 'main';
 
 const Charts = ({ suite }: { suite: Suite }) => {
   const {
@@ -33,7 +33,6 @@ const Charts = ({ suite }: { suite: Suite }) => {
     taylor_expansion: { taylordiff: te_t, taylorseries: te_s },
     pinn: { taylordiff: pinn_t, finitediff: pinn_f }
   } = suite;
-  console.log(Object.entries(scalar_f));
   return <div style={{display: "flex", flexWrap: 'wrap', justifyContent: 'space-around'}}>
     <Wrapper url='https://github.com/JuliaDiff/TaylorDiff.jl/blob/main/benchmark/scalar.jl'><Line data={{
       labels: Object.keys(scalar_f),
@@ -99,37 +98,44 @@ const Charts = ({ suite }: { suite: Suite }) => {
   </div>
 }
 
+const ContextPicker = ({ name, current, handler, children }: PropsWithChildren<{ name: string, current: string, handler: (s: string) => void}>) => <div className='context-picker'>
+  <span>{name}</span>
+  <select name={name} value={current} onChange={event => handler(event.target.value)}>
+    { children }
+  </select>
+</div>
+
 export default function TaylorDiff_jl() {
-  const { data, error } = useSWR(`/${id}`, async key => await post<BenchmarkData>(key));
-  const [ branch, setBranch ] = useState('');
+  const { data, error } = useSWR(`/${name}`, async key => await post<BenchmarkData>(key));
   const [ commit, setCommit ] = useState('');
   if (error) return <div>Error</div>;
   if (!data) return <div>Loading...</div>;
-  const id_branch = branch ? `${id}#${branch}` : data[id];
-  const id_branch_commit = commit ? `${id}#${branch}#${commit}` : data[id_branch];
-  const results = JSON.parse(data[id_branch_commit]) as BenchmarkResults;
-  const suite = results.benchmarkgroup as Suite;
-  const allBranches = Object.keys(data).filter(s => s.split('#').length == 2).map(s => s.split('#')[1]).sort();
-  const allCommits = Object.keys(data).filter(s => s.startsWith(id_branch + '#')).map(s => s.split('#')[2]).sort();
+  const epoch = (s: string) => (new Date(s)).getTime();
+  const tagLookup = new Map<string, string>(Object.values(data).filter(v => v.tag).map(v => [v.tag, v.commit]));
+  const branchLookup = new Map<string, BenchmarkUpload[]>();
+  for (const [k, v] of Object.entries(data)) {
+    branchLookup.set(v.branch, (branchLookup.get(v.branch) || []).concat([v]).sort((a, b) => epoch(a.date) - epoch(b.date)));
+  }
+  const result = commit ? data[`${name}#${commit}`] : branchLookup.get(defaultBranch)![0];
+  const { tag, branch } = result;
   return <>
     <Head title='TaylorDiff.jl' />
-    <main style={{maxWidth: '1440px', margin: 'auto'}}>
+    <header>
       <h1 style={{textAlign: 'center'}}><a href="https://github.com/JuliaDiff/TaylorDiff.jl" target="_blank" rel='noreferrer'>TaylorDiff.jl</a> Benchmarks</h1>
+    </header>
+    <main style={{maxWidth: '1440px', margin: 'auto'}}>
       <div style={{display: 'flex'}}>
-        <div className='context-picker'>
-          <span>Branch</span>
-          <select name="Branch" onChange={event => setBranch(event.target.value)}>
-            { allBranches.map(s => <option key={s}>{s}</option>) }
-          </select>
-        </div>
-        <div className='context-picker'>
-          <span>Commit</span>
-          <select name="Commit" onChange={event => setCommit(event.target.value)}>
-            { allCommits.map(s => <option key={s}>{s}</option>) }
-          </select>
-        </div>
+        <ContextPicker name="Tag" current={tag} handler={t => t && setCommit(tagLookup.get(t)!)}>
+          { Array.from(tagLookup.keys()).concat(['']).map(s => <option key={s} value={s}>{s}</option>) }
+        </ContextPicker>
+        <ContextPicker name="Branch" current={branch} handler={b => setCommit(branchLookup.get(b)![0].commit)}>
+          { Array.from(branchLookup.keys()).map(s => <option key={s} value={s}>{s}</option>) }
+        </ContextPicker>
+        <ContextPicker name="Commit" current={commit} handler={setCommit}>
+          { branchLookup.get(branch)!.map(v => v.commit).map(s => <option key={s} value={s}>{s.slice(0, 7)}</option>) }
+        </ContextPicker>
       </div>
-      <Charts suite={suite}/>
+      <Charts suite={result.benchmarkgroup as Suite}/>
     </main>
   </>
 }

@@ -1,7 +1,8 @@
 interface TrialEstimate {
   time: number,
   memory: number,
-  allocs: number
+  allocs: number,
+  params: Record<string, number>,
 }
 
 interface BenchmarkGroup {
@@ -20,22 +21,16 @@ interface G2 {
   [key: string]: G1
 }
 
-interface BenchmarkConfig {
-  id: string,
-  juliacmd: any,
-  env: Record<string, string>
-}
-
-interface BenchmarkResults {
+interface BenchmarkUpload {
+  config: Record<string, unknown>,
   name: string,
-  benchmarkconfig: BenchmarkConfig,
-  benchmarkgroup: BenchmarkGroup,
-  vinfo: string,
+  date: string,
   commit: string,
-  julia_commit: string,
-  date: string
+  tag: string,
+  branch: string,
+  benchmarkgroup: BenchmarkGroup,
 }
 
 interface BenchmarkData {
-  [key: string]: string
+  [key: string]: BenchmarkUpload
 }
