@@ -111,13 +111,13 @@ export default function TaylorDiff_jl() {
   if (error) return <div>Error</div>;
   if (!data) return <div>Loading...</div>;
   const epoch = (s: string) => (new Date(s)).getTime();
-  const tagLookup = new Map<string, string>(Object.values(data).filter(v => v.tag).map(v => [v.tag, v.commit]));
+  const tagLookup = new Map<string, string>(Object.values(data).filter(v => v.context.tag).map(v => [v.context.tag, v.context.commit]));
   const branchLookup = new Map<string, BenchmarkUpload[]>();
   for (const [k, v] of Object.entries(data)) {
-    branchLookup.set(v.branch, (branchLookup.get(v.branch) || []).concat([v]).sort((a, b) => epoch(a.date) - epoch(b.date)));
+    branchLookup.set(v.context.branch, (branchLookup.get(v.context.branch) || []).concat([v]).sort((a, b) => epoch(a.context.datetime) - epoch(b.context.datetime)));
   }
   const result = commit ? data[`${name}#${commit}`] : branchLookup.get(defaultBranch)![0];
-  const { tag, branch } = result;
+  const { tag, branch } = result.context;
   return <>
     <Head title='TaylorDiff.jl' />
     <header>
@@ -128,14 +128,14 @@ export default function TaylorDiff_jl() {
         <ContextPicker name="Tag" current={tag} handler={t => t && setCommit(tagLookup.get(t)!)}>
           { Array.from(tagLookup.keys()).concat(['']).map(s => <option key={s} value={s}>{s}</option>) }
         </ContextPicker>
-        <ContextPicker name="Branch" current={branch} handler={b => setCommit(branchLookup.get(b)![0].commit)}>
+        <ContextPicker name="Branch" current={branch} handler={b => setCommit(branchLookup.get(b)![0].context.commit)}>
           { Array.from(branchLookup.keys()).map(s => <option key={s} value={s}>{s}</option>) }
         </ContextPicker>
         <ContextPicker name="Commit" current={commit} handler={setCommit}>
-          { branchLookup.get(branch)!.map(v => v.commit).map(s => <option key={s} value={s}>{s.slice(0, 7)}</option>) }
+          { branchLookup.get(branch)!.map(v => v.context.commit).map(s => <option key={s} value={s}>{s.slice(0, 7)}</option>) }
         </ContextPicker>
       </div>
-      <Charts suite={result.benchmarkgroup as Suite}/>
+      <Charts suite={result.suite as Suite}/>
     </main>
   </>
 }

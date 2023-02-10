@@ -21,14 +21,17 @@ interface G2 {
   [key: string]: G1
 }
 
+interface BenchmarkContext {
+  datetime: string,
+  commit: string,
+  branch: string,
+  tag: string,
+}
+
 interface BenchmarkUpload {
   config: Record<string, unknown>,
-  name: string,
-  date: string,
-  commit: string,
-  tag: string,
-  branch: string,
-  benchmarkgroup: BenchmarkGroup,
+  context: BenchmarkContext,
+  suite: BenchmarkGroup,
 }
 
 interface BenchmarkData {
