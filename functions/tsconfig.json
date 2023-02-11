@@ -1,13 +1,9 @@
 {
-    "compilerOptions": {
-        "target": "esnext",
-        "module": "esnext",
-        "lib": [
-            "esnext"
-        ],
-        "types": [
-            "@cloudflare/workers-types"
-        ]
-    },
-    "include": ["**/*.ts", "../types/**.d.ts"]
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["esnext"],
+    "types": ["@cloudflare/workers-types"]
+  },
+  "include": ["**/*.ts", "../types/**.d.ts"]
 }
