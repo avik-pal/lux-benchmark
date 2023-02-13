@@ -2,22 +2,21 @@ import { PropsWithChildren } from "react";
 import styled from "styled-components";
 
 const Wrapper = styled.div`
-  @media (max-width: 720px) {
-    margin: 1.5rem auto;
-    width: 90%;
-  }
-
-  @media (min-width: 720px) {
-    margin: 2rem;
-    width: 40%;
-  }
-
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: 2rem;
+  min-width: 300px;
+  flex: 0 1 400px;
+
+  @media (max-width: 500px) {
+    margin: 1rem;
+  }
 `;
 
 const SourceViewer = styled.button`
+  font-size: 1rem;
+  box-shadow: none;
   background-color: cornflowerblue;
   border-radius: 0.5rem;
   color: white;
@@ -38,7 +37,7 @@ export default function ChartWrapper({
     <Wrapper>
       {children}
       <a href={url} target="_blank" rel="noreferrer">
-        <SourceViewer className="button">View Source</SourceViewer>
+        <SourceViewer>View Source</SourceViewer>
       </a>
     </Wrapper>
   );

@@ -16,13 +16,20 @@ import {
 import type { FontSpec } from "chart.js";
 import { Bar, Line } from "react-chartjs-2";
 import { useBenchmarkData } from "@/utils/data";
-import { useState, PropsWithChildren } from "react";
+import { useState } from "react";
+import styled from "styled-components";
 import Head from "@/components/Head";
 import ProjectHeader from "@/components/ProjectHeader";
 import ChartWrapper from "@/components/ChartWrapper";
-import ContextPicker from "@/components/ContextPicker";
-import styled from "styled-components";
+import SeriesNavigator from "@/components/SeriesNavigator";
 import ContextNavigator from "@/components/ContextNavigator";
+import ChartsContainer from "@/components/ChartsContainer";
+import TimeSeries from "@/components/TimeSeries";
+
+enum Mode {
+  Snapshot,
+  TimeSeries
+}
 
 Chart.register(
   BarController,
@@ -179,15 +186,53 @@ const Charts = ({ suite }: { suite: Suite }) => {
   );
 };
 
-const ChartsContainer = styled.div`
+import * as Switch from '@radix-ui/react-switch';
+
+
+const Switcher = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-`;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem 0;
+`
+
+const CommonParts = ({ name, mode, setMode }: {
+  name: string,
+  mode: Mode,
+  setMode: (m: Mode) => void
+}) => {
+  return (
+    <>
+      <Head title={name} />
+      <ProjectHeader
+        name={name}
+        url="https://github.com/JuliaDiff/TaylorDiff.jl"
+      />
+      <Switcher>
+        <label className="Label" htmlFor="airplane-mode" style={{ paddingRight: 15 }}>
+          Snapshot mode
+        </label>
+        <Switch.Root
+          className="SwitchRoot"
+          id="airplane-mode"
+          checked={mode === Mode.TimeSeries}
+          onCheckedChange={() => setMode(1 - mode)}
+        >
+          <Switch.Thumb className="SwitchThumb" />
+        </Switch.Root>
+        <label className="Label" htmlFor="airplane-mode" style={{ paddingLeft: 15 }}>
+          Time series mode
+        </label>
+      </Switcher>
+    </>
+  )
+}
 
 export default function TaylorDiff_jl() {
   const { data, error } = useBenchmarkData(name);
+  const [mode, setMode] = useState(Mode.Snapshot);
   const [commit, setCommit] = useState("");
+  const [series, setSeries] = useState(defaultBranch);
   if (error) return <div>Error</div>;
   if (!data) return <div>Loading...</div>;
   const epoch = (s: string) => new Date(s).getTime();
@@ -209,13 +254,9 @@ export default function TaylorDiff_jl() {
     ? data[`${name}#${commit}`]
     : branchLookup.get(defaultBranch)![0];
   const { tag, branch } = result.context;
-  return (
+  return mode === Mode.Snapshot ? (
     <>
-      <Head title="TaylorDiff.jl" />
-      <ProjectHeader
-        name={name}
-        url="https://github.com/JuliaDiff/TaylorDiff.jl"
-      />
+      <CommonParts name={name} mode={mode} setMode={setMode} />
       <ContextNavigator
         tag={tag}
         branch={branch}
@@ -226,6 +267,18 @@ export default function TaylorDiff_jl() {
       />
       <main style={{ maxWidth: "1440px", margin: "auto" }}>
         <Charts suite={result.suite as Suite} />
+      </main>
+    </>
+  ) : (
+    <>
+      <CommonParts name={name} mode={mode} setMode={setMode} />
+      <SeriesNavigator
+        allSeries={Array.from(branchLookup.keys())}
+        series={series}
+        setSeries={setSeries}
+      />
+      <main style={{ maxWidth: "1440px", margin: "auto" }}>
+        <TimeSeries data={branchLookup.get(series)!} filter={(bc) => !"12356789".includes(bc[bc.length - 1])}/>
       </main>
     </>
   );

@@ -10,6 +10,12 @@ interface ContextProps {
   branchLookup: Map<string, BenchmarkUpload[]>;
 }
 
+const Wrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 4vw;
+`
+
 export default function ContextNavigator({
   tag,
   branch,
@@ -19,41 +25,27 @@ export default function ContextNavigator({
   branchLookup,
 }: ContextProps) {
   return (
-    <div style={{ display: "flex" }}>
+    <Wrapper>
       <ContextPicker
         name="Tag"
         current={tag}
         handler={(t) => t && setCommit(tagLookup.get(t)!)}
-      >
-        {Array.from(tagLookup.keys())
-          .concat([""])
-          .map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-      </ContextPicker>
+        options={Array.from(tagLookup.keys())
+          .concat([""])}
+      />
       <ContextPicker
         name="Branch"
         current={branch}
         handler={(b) => setCommit(branchLookup.get(b)![0].context.commit)}
-      >
-        {Array.from(branchLookup.keys()).map((s) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
-        ))}
-      </ContextPicker>
-      <ContextPicker name="Commit" current={commit} handler={setCommit}>
-        {branchLookup
-          .get(branch)!
-          .map((v) => v.context.commit)
-          .map((s) => (
-            <option key={s} value={s}>
-              {s.slice(0, 7)}
-            </option>
-          ))}
-      </ContextPicker>
-    </div>
+        options={Array.from(branchLookup.keys())}
+      />
+      <ContextPicker
+        name="Commit"
+        current={commit}
+        handler={setCommit}
+        options={branchLookup.get(branch)!.map((v) => v.context.commit)}
+        displayOption={x => x.slice(0, 7)}
+      />
+    </Wrapper>
   );
 }
