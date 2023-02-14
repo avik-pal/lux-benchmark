@@ -6,19 +6,31 @@ interface TrialEstimate {
 }
 
 interface BenchmarkGroup {
-  [key: string]: TrialEstimate | BenchmarkGroup;
+  tags: string[];
+  data: {
+    [key: string]: TrialEstimate | BenchmarkGroup;
+  };
 }
 
 interface G0 {
-  [key: string]: TrialEstimate;
+  tags: string[];
+  data: {
+    [key: string]: TrialEstimate;
+  };
 }
 
 interface G1 {
-  [key: string]: G0;
+  tags: string[];
+  data: {
+    [key: string]: G0;
+  };
 }
 
 interface G2 {
-  [key: string]: G1;
+  tags: string[];
+  data: {
+    [key: string]: G1;
+  };
 }
 
 interface BenchmarkContext {

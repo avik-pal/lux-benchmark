@@ -7,8 +7,10 @@ async function post<T>(key: string) {
 }
 
 export const useBenchmarkData = (name: string) => {
-  return useSWR(
-    `/${name}`,
-    async (key) => await post<BenchmarkData>(key)
-  );
-}
+  return useSWR(`/${name}`, async (key) => await post<BenchmarkData>(key));
+};
+
+const epoch = (s: string) => new Date(s).getTime();
+
+export const sortByDate = (a: BenchmarkUpload, b: BenchmarkUpload) =>
+  epoch(b.context.datetime) - epoch(a.context.datetime);

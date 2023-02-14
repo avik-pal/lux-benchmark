@@ -9,11 +9,7 @@ export default function ProjectHeader({ name, url }: ProjectInfo) {
   return (
     <header>
       <h1 style={{ textAlign: "center" }}>
-        <a
-          href={url}
-          target="_blank"
-          rel="noreferrer"
-        >
+        <a href={url} target="_blank" rel="noreferrer">
           {name}
         </a>{" "}
         Benchmarks

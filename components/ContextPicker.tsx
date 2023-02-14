@@ -35,9 +35,11 @@ export default function ContextPicker({
         value={current}
         onChange={(event) => handler(event.target.value)}
       >
-        { options.map(o => <option key={o} value={o}>
-          { displayOption ? displayOption(o) : o }
-        </option>)}
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {displayOption ? displayOption(o) : o}
+          </option>
+        ))}
       </select>
     </Wrapper>
   );

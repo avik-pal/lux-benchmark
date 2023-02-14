@@ -32,13 +32,15 @@ const SourceViewer = styled.button`
 export default function ChartWrapper({
   url,
   children,
-}: PropsWithChildren<{ url: string }>) {
+}: PropsWithChildren<{ url?: string }>) {
   return (
     <Wrapper>
       {children}
-      <a href={url} target="_blank" rel="noreferrer">
-        <SourceViewer>View Source</SourceViewer>
-      </a>
+      {url && (
+        <a href={url} target="_blank" rel="noreferrer">
+          <SourceViewer>View Source</SourceViewer>
+        </a>
+      )}
     </Wrapper>
   );
 }

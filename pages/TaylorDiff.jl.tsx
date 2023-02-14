@@ -15,7 +15,7 @@ import {
 } from "chart.js";
 import type { FontSpec } from "chart.js";
 import { Bar, Line } from "react-chartjs-2";
-import { useBenchmarkData } from "@/utils/data";
+import { sortByDate, useBenchmarkData } from "@/utils/data";
 import { useState } from "react";
 import styled from "styled-components";
 import Head from "@/components/Head";
@@ -28,7 +28,7 @@ import TimeSeries from "@/components/TimeSeries";
 
 enum Mode {
   Snapshot,
-  TimeSeries
+  TimeSeries,
 }
 
 Chart.register(
@@ -48,35 +48,37 @@ Chart.defaults.plugins.title.display = true;
 (Chart.defaults.plugins.title.font as FontSpec).size = 20;
 
 type Suite = {
-  scalar: G1;
-  mlp: G1;
-  taylor_expansion: G0;
-  pinn: G1;
+  tags: [];
+  data: {
+    scalar: G1;
+    mlp: G1;
+    taylor_expansion: G0;
+    pinn: G1;
+  };
 };
 
 const name = "TaylorDiff.jl",
   defaultBranch = "main";
 
 const Charts = ({ suite }: { suite: Suite }) => {
-  const {
-    scalar: { forwarddiff: scalar_f, taylordiff: scalar_t },
-    mlp: { forwarddiff: mlp_f, taylordiff: mlp_t },
-    taylor_expansion: { taylordiff: te_t, taylorseries: te_s },
-    pinn: { taylordiff: pinn_t, finitediff: pinn_f },
-  } = suite;
+  const { tags, data } = suite;
+  const { forwarddiff: scalar_f, taylordiff: scalar_t } = data.scalar.data;
+  const { forwarddiff: mlp_f, taylordiff: mlp_t } = data.mlp.data;
+  const { taylordiff: te_t, taylorseries: te_s } = data.taylor_expansion.data;
+  const { taylordiff: pinn_t, finitediff: pinn_f } = data.pinn.data;
   return (
     <ChartsContainer>
       <ChartWrapper url="https://github.com/JuliaDiff/TaylorDiff.jl/blob/main/benchmark/scalar.jl">
         <Line
           data={{
-            labels: Object.keys(scalar_f),
+            labels: Object.keys(scalar_f.data),
             datasets: [
               {
-                data: Object.values(scalar_f).map((x) => x.time),
+                data: Object.values(scalar_f.data).map((x) => x.time),
                 label: "ForwardDiff.jl",
               },
               {
-                data: Object.values(scalar_t).map((x) => x.time),
+                data: Object.values(scalar_t.data).map((x) => x.time),
                 label: "TaylorDiff.jl",
               },
             ],
@@ -98,14 +100,14 @@ const Charts = ({ suite }: { suite: Suite }) => {
       <ChartWrapper url="https://github.com/JuliaDiff/TaylorDiff.jl/blob/main/benchmark/mlp.jl">
         <Line
           data={{
-            labels: Object.keys(mlp_f),
+            labels: Object.keys(mlp_f.data),
             datasets: [
               {
-                data: Object.values(mlp_f).map((x) => x.time),
+                data: Object.values(mlp_f.data).map((x) => x.time),
                 label: "ForwardDiff.jl",
               },
               {
-                data: Object.values(mlp_t).map((x) => x.time),
+                data: Object.values(mlp_t.data).map((x) => x.time),
                 label: "TaylorDiff.jl",
               },
             ],
@@ -160,14 +162,14 @@ const Charts = ({ suite }: { suite: Suite }) => {
       <ChartWrapper url="https://github.com/JuliaDiff/TaylorDiff.jl/blob/main/benchmark/pinn.jl">
         <Bar
           data={{
-            labels: Object.keys(pinn_f),
+            labels: Object.keys(pinn_f.data),
             datasets: [
               {
-                data: Object.values(pinn_f).map((x) => x.time / 1000),
+                data: Object.values(pinn_f.data).map((x) => x.time / 1000),
                 label: "FiniteDifferences.jl",
               },
               {
-                data: Object.values(pinn_t).map((x) => x.time / 1000),
+                data: Object.values(pinn_t.data).map((x) => x.time / 1000),
                 label: "TaylorDiff.jl",
               },
             ],
@@ -186,20 +188,23 @@ const Charts = ({ suite }: { suite: Suite }) => {
   );
 };
 
-import * as Switch from '@radix-ui/react-switch';
-
+import * as Switch from "@radix-ui/react-switch";
 
 const Switcher = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   margin: 1rem 0;
-`
+`;
 
-const CommonParts = ({ name, mode, setMode }: {
-  name: string,
-  mode: Mode,
-  setMode: (m: Mode) => void
+const CommonParts = ({
+  name,
+  mode,
+  setMode,
+}: {
+  name: string;
+  mode: Mode;
+  setMode: (m: Mode) => void;
 }) => {
   return (
     <>
@@ -209,8 +214,8 @@ const CommonParts = ({ name, mode, setMode }: {
         url="https://github.com/JuliaDiff/TaylorDiff.jl"
       />
       <Switcher>
-        <label className="Label" htmlFor="airplane-mode" style={{ paddingRight: 15 }}>
-          Snapshot mode
+        <label className="Label" style={{ paddingRight: 15 }}>
+          View by Snapshot
         </label>
         <Switch.Root
           className="SwitchRoot"
@@ -220,13 +225,18 @@ const CommonParts = ({ name, mode, setMode }: {
         >
           <Switch.Thumb className="SwitchThumb" />
         </Switch.Root>
-        <label className="Label" htmlFor="airplane-mode" style={{ paddingLeft: 15 }}>
-          Time series mode
+        <label className="Label" style={{ paddingLeft: 15 }}>
+          View by Time Series
         </label>
       </Switcher>
     </>
-  )
-}
+  );
+};
+
+const MainWrapper = styled.main`
+  max-width: 1440px;
+  margin: auto;
+`;
 
 export default function TaylorDiff_jl() {
   const { data, error } = useBenchmarkData(name);
@@ -235,20 +245,18 @@ export default function TaylorDiff_jl() {
   const [series, setSeries] = useState(defaultBranch);
   if (error) return <div>Error</div>;
   if (!data) return <div>Loading...</div>;
-  const epoch = (s: string) => new Date(s).getTime();
-  const tagLookup = new Map<string, string>(
+  const tagLookup = new Map<string, BenchmarkUpload>(
     Object.values(data)
       .filter((v) => v.context.tag)
-      .map((v) => [v.context.tag, v.context.commit])
+      .map((v) => [v.context.tag, v])
   );
+  const tagged = Array.from(tagLookup.values()).sort(sortByDate);
   const branchLookup = new Map<string, BenchmarkUpload[]>();
   for (const [k, v] of Object.entries(data)) {
-    branchLookup.set(
-      v.context.branch,
-      (branchLookup.get(v.context.branch) || [])
-        .concat([v])
-        .sort((a, b) => epoch(b.context.datetime) - epoch(a.context.datetime))
-    );
+    if (!branchLookup.has(v.context.branch)) {
+      branchLookup.set(v.context.branch, []);
+    }
+    branchLookup.get(v.context.branch)!.push(v);
   }
   const result = commit
     ? data[`${name}#${commit}`]
@@ -265,21 +273,28 @@ export default function TaylorDiff_jl() {
         tagLookup={tagLookup}
         branchLookup={branchLookup}
       />
-      <main style={{ maxWidth: "1440px", margin: "auto" }}>
+      <MainWrapper>
         <Charts suite={result.suite as Suite} />
-      </main>
+      </MainWrapper>
     </>
   ) : (
     <>
       <CommonParts name={name} mode={mode} setMode={setMode} />
       <SeriesNavigator
-        allSeries={Array.from(branchLookup.keys())}
+        allSeries={Array.from(branchLookup.keys()).concat(["tagged"])}
         series={series}
         setSeries={setSeries}
       />
-      <main style={{ maxWidth: "1440px", margin: "auto" }}>
-        <TimeSeries data={branchLookup.get(series)!} filter={(bc) => !"12356789".includes(bc[bc.length - 1])}/>
-      </main>
+      <MainWrapper>
+        <TimeSeries
+          data={
+            series === "tagged"
+              ? tagged
+              : branchLookup.get(series)!.sort(sortByDate)
+          }
+          filter={(bc) => !"12356789".includes(bc[bc.length - 1])}
+        />
+      </MainWrapper>
     </>
   );
 }

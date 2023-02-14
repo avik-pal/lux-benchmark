@@ -34,7 +34,7 @@ button {
 .SwitchRoot:focus {
   box-shadow: 0 0 0 2px cornflowerblue;
 }
-.SwitchRoot[data-state='checked'] {
+.SwitchRoot[data-state="checked"] {
   background-color: cornflowerblue;
 }
 
@@ -48,7 +48,7 @@ button {
   transform: translateX(2px);
   will-change: transform;
 }
-.SwitchThumb[data-state='checked'] {
+.SwitchThumb[data-state="checked"] {
   transform: translateX(19px);
 }
 
