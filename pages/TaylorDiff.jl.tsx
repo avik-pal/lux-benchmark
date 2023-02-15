@@ -25,6 +25,7 @@ import SeriesNavigator from "@/components/SeriesNavigator";
 import ContextNavigator from "@/components/ContextNavigator";
 import ChartsContainer from "@/components/ChartsContainer";
 import TimeSeries from "@/components/TimeSeries";
+import Switcher from "@/components/Switcher";
 
 enum Mode {
   Snapshot,
@@ -47,25 +48,16 @@ Chart.defaults.aspectRatio = 1.2;
 Chart.defaults.plugins.title.display = true;
 (Chart.defaults.plugins.title.font as FontSpec).size = 20;
 
-type Suite = {
-  tags: [];
-  data: {
-    scalar: G1;
-    mlp: G1;
-    taylor_expansion: G0;
-    pinn: G1;
-  };
-};
-
 const name = "TaylorDiff.jl",
   defaultBranch = "main";
 
-const Charts = ({ suite }: { suite: Suite }) => {
-  const { tags, data } = suite;
-  const { forwarddiff: scalar_f, taylordiff: scalar_t } = data.scalar.data;
-  const { forwarddiff: mlp_f, taylordiff: mlp_t } = data.mlp.data;
-  const { taylordiff: te_t, taylorseries: te_s } = data.taylor_expansion.data;
-  const { taylordiff: pinn_t, finitediff: pinn_f } = data.pinn.data;
+const Charts = ({ suite }: { suite: BenchmarkGroup }) => {
+  const { scalar, mlp, taylor_expansion, pinn } = suite.data;
+  const { forwarddiff: scalar_f, taylordiff: scalar_t } = (scalar as G1).data;
+  const { forwarddiff: mlp_f, taylordiff: mlp_t } = (mlp as G1).data;
+  const { taylordiff: te_t, taylorseries: te_s } = (taylor_expansion as G0)
+    .data;
+  const { taylordiff: pinn_t, finitediff: pinn_f } = (pinn as G1).data;
   return (
     <ChartsContainer>
       <ChartWrapper url="https://github.com/JuliaDiff/TaylorDiff.jl/blob/main/benchmark/scalar.jl">
@@ -188,51 +180,6 @@ const Charts = ({ suite }: { suite: Suite }) => {
   );
 };
 
-import * as Switch from "@radix-ui/react-switch";
-
-const Switcher = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 1rem 0;
-`;
-
-const CommonParts = ({
-  name,
-  mode,
-  setMode,
-}: {
-  name: string;
-  mode: Mode;
-  setMode: (m: Mode) => void;
-}) => {
-  return (
-    <>
-      <Head title={name} />
-      <ProjectHeader
-        name={name}
-        url="https://github.com/JuliaDiff/TaylorDiff.jl"
-      />
-      <Switcher>
-        <label className="Label" style={{ paddingRight: 15 }}>
-          View by Snapshot
-        </label>
-        <Switch.Root
-          className="SwitchRoot"
-          id="airplane-mode"
-          checked={mode === Mode.TimeSeries}
-          onCheckedChange={() => setMode(1 - mode)}
-        >
-          <Switch.Thumb className="SwitchThumb" />
-        </Switch.Root>
-        <label className="Label" style={{ paddingLeft: 15 }}>
-          View by Time Series
-        </label>
-      </Switcher>
-    </>
-  );
-};
-
 const MainWrapper = styled.main`
   max-width: 1440px;
   margin: auto;
@@ -262,39 +209,50 @@ export default function TaylorDiff_jl() {
     ? data[`${name}#${commit}`]
     : branchLookup.get(defaultBranch)![0];
   const { tag, branch } = result.context;
-  return mode === Mode.Snapshot ? (
+  return (
     <>
-      <CommonParts name={name} mode={mode} setMode={setMode} />
-      <ContextNavigator
-        tag={tag}
-        branch={branch}
-        commit={commit}
-        setCommit={setCommit}
-        tagLookup={tagLookup}
-        branchLookup={branchLookup}
+      <Head title={name} />
+      <ProjectHeader
+        name={name}
+        url="https://github.com/JuliaDiff/TaylorDiff.jl"
       />
-      <MainWrapper>
-        <Charts suite={result.suite as Suite} />
-      </MainWrapper>
-    </>
-  ) : (
-    <>
-      <CommonParts name={name} mode={mode} setMode={setMode} />
-      <SeriesNavigator
-        allSeries={Array.from(branchLookup.keys()).concat(["tagged"])}
-        series={series}
-        setSeries={setSeries}
+      <Switcher
+        checked={mode === Mode.TimeSeries}
+        onCheckedChange={() => setMode(1 - mode)}
       />
-      <MainWrapper>
-        <TimeSeries
-          data={
-            series === "tagged"
-              ? tagged
-              : branchLookup.get(series)!.sort(sortByDate)
-          }
-          filter={(bc) => !"12356789".includes(bc[bc.length - 1])}
-        />
-      </MainWrapper>
+      {mode === Mode.Snapshot ? (
+        <>
+          <ContextNavigator
+            tag={tag}
+            branch={branch}
+            commit={commit}
+            setCommit={setCommit}
+            tagLookup={tagLookup}
+            branchLookup={branchLookup}
+          />
+          <MainWrapper>
+            <Charts suite={result.suite} />
+          </MainWrapper>
+        </>
+      ) : (
+        <>
+          <SeriesNavigator
+            allSeries={Array.from(branchLookup.keys()).concat(["tagged"])}
+            series={series}
+            setSeries={setSeries}
+          />
+          <MainWrapper>
+            <TimeSeries
+              data={
+                series === "tagged"
+                  ? tagged
+                  : branchLookup.get(series)!.sort(sortByDate)
+              }
+              filter={(bc) => !"12356789".includes(bc[bc.length - 1])}
+            />
+          </MainWrapper>
+        </>
+      )}
     </>
   );
 }

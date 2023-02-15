@@ -8,7 +8,8 @@
     "export": "next export",
     "preview": "serve out",
     "start": "wrangler pages dev --kv BENCHMARK --persist --compatibility-date=2023-01-17 -- next dev",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prettier": "npx prettier -w ."
   },
   "dependencies": {
     "@next/font": "13.1.2",

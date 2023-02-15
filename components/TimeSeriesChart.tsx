@@ -11,8 +11,10 @@ import {
   Title,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import styled from "styled-components";
 
 import ChartWrapper from "./ChartWrapper";
+import TagList from "./TagList";
 
 Chart.register(
   LineController,
@@ -25,8 +27,11 @@ Chart.register(Colors, Legend, Title, Tooltip);
 
 interface Props {
   breadcrumb: string;
+  tags: Set<string>;
   contexts: BenchmarkContext[];
   series: TrialEstimate[];
+  toggleTag: (t: string) => void;
+  selectedTags: Set<string>;
 }
 
 // Leave some space between the maximum value and the top of plot, while still have nice numbers
@@ -38,8 +43,11 @@ const determineYMax = (times: number[]) => {
 
 export default function TimeSeriesChart({
   breadcrumb,
+  tags,
   contexts,
   series,
+  toggleTag,
+  selectedTags,
 }: Props) {
   const slug = breadcrumb;
   const commits = contexts.map((x) => x.commit.slice(0, 7));
@@ -65,6 +73,11 @@ export default function TimeSeriesChart({
             title: { text: slug, display: true },
           },
         }}
+      />
+      <TagList
+        tags={Array.from(tags).sort()}
+        toggleTag={toggleTag}
+        selectedTags={selectedTags}
       />
     </ChartWrapper>
   );

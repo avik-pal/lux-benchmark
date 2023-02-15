@@ -13,7 +13,7 @@ interface ContextProps {
 const Wrapper = styled.div`
   display: flex;
   justify-content: center;
-  gap: 4vw;
+  gap: 6vw;
 `;
 
 export default function ContextNavigator({

@@ -11,6 +11,10 @@ const Wrapper = styled.div`
   & option {
     font-size: 1rem;
   }
+
+  @media (max-width: 500px) {
+    flex-direction: column;
+  }
 `;
 
 export default function ContextPicker({
