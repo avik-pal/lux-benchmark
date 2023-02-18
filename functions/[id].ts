@@ -3,7 +3,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { keys } = await context.env.BENCHMARK.list({ prefix: name });
   const result: Record<string, any> = {};
   for (const key of keys) {
-    result[key.name] = JSON.parse(await context.env.BENCHMARK.get(key.name));
+    const value = await context.env.BENCHMARK.get(key.name);
+    result[key.name] = JSON.parse(value!);
   }
   return new Response(JSON.stringify(result));
 };

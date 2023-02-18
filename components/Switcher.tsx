@@ -1,6 +1,11 @@
 import * as Switch from "@radix-ui/react-switch";
 import styled from "styled-components";
 
+export enum Mode {
+  Snapshot,
+  TimeSeries,
+}
+
 const Wrapper = styled.div`
   display: flex;
   justify-content: center;

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import styled from "styled-components";
 import ChartsContainer from "./ChartsContainer";
@@ -6,7 +8,7 @@ import TimeSeriesChart from "./TimeSeriesChart";
 
 interface Props {
   data: BenchmarkUpload[];
-  filter: (bc: string[]) => boolean;
+  filter?: (bc: string[]) => boolean;
 }
 
 function isLeaf(thing: BenchmarkGroup | TrialEstimate): thing is TrialEstimate {
@@ -42,7 +44,7 @@ export default function TimeSeries({ data, filter }: Props) {
     thing: BenchmarkGroup | TrialEstimate
   ) => {
     if (isLeaf(thing)) {
-      if (!filter(breadcrumb)) return;
+      if (filter && !filter(breadcrumb)) return;
       const path = breadcrumb.join(".");
       if (!breadcrumbMap.has(path)) {
         breadcrumbMap.set(path, { tags: new Set(), contexts: [], series: [] });

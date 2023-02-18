@@ -12,5 +12,8 @@ export const useBenchmarkData = (name: string) => {
 
 const epoch = (s: string) => new Date(s).getTime();
 
-export const sortByDate = (a: BenchmarkUpload, b: BenchmarkUpload) =>
+export const sortByDateDsc = (a: BenchmarkUpload, b: BenchmarkUpload) =>
   epoch(b.context.datetime) - epoch(a.context.datetime);
+
+export const sortByDateAsc = (a: BenchmarkUpload, b: BenchmarkUpload) =>
+  epoch(a.context.datetime) - epoch(b.context.datetime);

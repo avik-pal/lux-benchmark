@@ -1,3 +1,6 @@
+import { createGlobalStyle } from "styled-components";
+
+const GlobalStyles = createGlobalStyle`
 html,
 body {
   max-width: 100vw;
@@ -18,7 +21,6 @@ body {
   isolation: isolate;
 }
 
-/* reset */
 button {
   all: unset;
 }
@@ -57,3 +59,6 @@ button {
   font-size: 15px;
   line-height: 1;
 }
+`;
+
+export default GlobalStyles;
