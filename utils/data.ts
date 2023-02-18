@@ -1,13 +1,20 @@
 import useSWR from "swr";
+const host = "https://benchmark-data.tansongchen.workers.dev/";
 
-async function post<T>(key: string) {
-  return (await (
-    await fetch(key, { method: "POST", body: JSON.stringify({}) })
-  ).json()) as T;
+async function get<T>(key: string) {
+  const response = await fetch(key);
+  const data = await response.json();
+  return data as T;
+}
+
+export async function getBenchmarkData(key: string) {
+  const response = await fetch(host + key);
+  const data = await response.json();
+  return data as BenchmarkData;
 }
 
 export const useBenchmarkData = (name: string) => {
-  return useSWR(`/${name}`, async (key) => await post<BenchmarkData>(key));
+  return useSWR(host + name, async (key) => await get<BenchmarkData>(key));
 };
 
 const epoch = (s: string) => new Date(s).getTime();

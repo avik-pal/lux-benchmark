@@ -1,4 +1,3 @@
-import SnapshotLayout from "@/components/SnapshotLayout";
 import ChartsContainer from "@/components/ChartsContainer";
 import ChartWrapper from "@/components/ChartWrapper";
 import { Bar, Line } from "react-chartjs-2";
@@ -129,15 +128,5 @@ export function Charts({ suite }: { suite: BenchmarkGroup }) {
         />
       </ChartWrapper>
     </ChartsContainer>
-  );
-}
-
-export default function Page() {
-  return (
-    <SnapshotLayout
-      name="TaylorDiff.jl"
-      id="main"
-      Charts={Charts}
-    />
   );
 }

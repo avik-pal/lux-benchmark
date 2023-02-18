@@ -3,39 +3,36 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "export": "next export",
-    "preview": "serve out",
-    "start": "wrangler pages dev --kv BENCHMARK --persist --compatibility-date=2023-01-17 -- next dev",
-    "lint": "next lint",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "start": "vite preview",
     "prettier": "npx prettier -w ."
   },
   "dependencies": {
-    "@next/font": "^13.1.6",
     "@radix-ui/react-icons": "^1.1.1",
     "@radix-ui/react-select": "^1.2.0",
     "@radix-ui/react-switch": "^1.0.1",
     "chart.js": "^4.2.1",
-    "eslint": "^8.34.0",
-    "eslint-config-next": "^13.1.6",
-    "next": "^13.1.6",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.1",
     "styled-components": "^5.3.6",
     "swr": "^2.0.3"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^0.3.0",
-    "@cloudflare/workers-types": "^4.20230214.0",
     "@types/node": "^18.13.0",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "@types/styled-components": "^5.1.26",
+    "@vitejs/plugin-react": "^3.1.0",
     "babel-plugin-styled-components": "^2.0.7",
+    "eslint": "^8.34.0",
     "prettier": "^2.8.4",
     "typescript": "^4.9.5",
-    "vercel": "^28.16.2"
+    "vercel": "^28.16.2",
+    "vite": "^4.1.2",
+    "vite-plugin-rewrite-all": "^1.0.1",
+    "vite-tsconfig-paths": "^4.0.5"
   }
 }

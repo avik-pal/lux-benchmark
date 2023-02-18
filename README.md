@@ -1,6 +1,6 @@
 # benchmark
 
-This is a benchmark dashboard application designed for [Julia](https://julialang.org) projects, built with [Next.js](https://nextjs.org/).
+This is a benchmark dashboard application designed for [Julia](https://julialang.org) projects, built with [React](https://reactjs.org/) and [Vite](https://vitejs.dev).
 
 ## Getting Started
 
