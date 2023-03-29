@@ -68,7 +68,7 @@ export default function TimeSeriesLayout({
     <>
       <ProjectHeader
         name={name}
-        url="https://github.com/JuliaDiff/TaylorDiff.jl"
+        url="https://github.com/LuxDL/Lux.jl"
       />
       <Switcher
         checked={true}

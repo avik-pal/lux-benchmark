@@ -44,7 +44,7 @@ export default function SnapshotLayout({ name, id, Charts, data }: PropsWithChil
     <>
       <ProjectHeader
         name={name}
-        url="https://github.com/JuliaDiff/TaylorDiff.jl"
+        url="https://github.com/LuxDL/Lux.jl"
       />
       <Switcher
         checked={false}

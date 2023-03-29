@@ -1,7 +1,7 @@
 import SnapshotLayout from "@/components/SnapshotLayout";
 import { getBenchmarkData } from "@/utils/data";
 import { LoaderFunction, useLoaderData } from "react-router-dom";
-import { Charts } from "../configs/TaylorDiff.jl";
+import { ChartsLuxLib } from "../configs/LuxLib.jl";
 
 export const loaderHome = (name: string, defaultBranch: string) => {
   const f: LoaderFunction = async () => {
@@ -23,5 +23,5 @@ export default function Commit() {
     id: string;
     data: BenchmarkData;
   };
-  return <SnapshotLayout name={name} id={id} data={data} Charts={Charts}/>;
+  return <SnapshotLayout name={name} id={id} data={data} Charts={ChartsLuxLib}/>;
 }

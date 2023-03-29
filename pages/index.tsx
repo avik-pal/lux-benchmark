@@ -6,7 +6,10 @@ export default function App() {
       <h1>Continuous Benchmarking for Julia Projects</h1>
       <ul>
         <li>
-          <a href="/TaylorDiff.jl">TaylorDiff.jl</a>
+          <a href="/Lux.jl">Lux.jl</a>
+        </li>
+        <li>
+          <a href="/LuxLib.jl">LuxLib.jl</a>
         </li>
       </ul>
     </MainWrapper>

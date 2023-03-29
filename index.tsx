@@ -38,10 +38,16 @@ const router = createBrowserRouter([
     loader: loaderCommit,
   },
   {
-    path: "/TaylorDiff.jl",
+    path: "/Lux.jl",
     element: <Commit />,
     errorElement: <ErrorPage />,
-    loader: loaderHome("TaylorDiff.jl", "main"),
+    loader: loaderHome("Lux.jl", "main"),
+  },
+  {
+    path: "/LuxLib.jl",
+    element: <Commit />,
+    errorElement: <ErrorPage />,
+    loader: loaderHome("LuxLib.jl", "main"),
   },
 ]);
 
