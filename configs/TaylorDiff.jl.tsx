@@ -2,26 +2,25 @@ import ChartsContainer from "@/components/ChartsContainer";
 import ChartWrapper from "@/components/ChartWrapper";
 import { Bar, Line } from "react-chartjs-2";
 
-export function Charts({ suite }: { suite: BenchmarkGroup }) {
-  const { scalar, mlp, taylor_expansion, pinn } = suite.data;
-  const { forwarddiff: scalar_f, taylordiff: scalar_t } = (scalar as G1).data;
-  const { forwarddiff: mlp_f, taylordiff: mlp_t } = (mlp as G1).data;
-  const { taylordiff: te_t, taylorseries: te_s } = (taylor_expansion as G0)
-    .data;
-  const { taylordiff: pinn_t, finitediff: pinn_f } = (pinn as G1).data;
+export function Charts({ result }: { result: BenchmarkGroup[] }) {
+  const [pinn, mlp, scalar, taylor_expansion] = result;
+  const [scalar_f, scalar_t] = (scalar as G1).data;
+  const [mlp_f, mlp_t] = (mlp as G1).data;
+  const [te_t, te_s] = (taylor_expansion as G0).data;
+  const [pinn_t, pinn_f] = (pinn as G1).data;
   return (
     <ChartsContainer>
       <ChartWrapper url="https://github.com/JuliaDiff/TaylorDiff.jl/blob/main/benchmark/scalar.jl">
         <Line
           data={{
-            labels: Object.keys(scalar_f.data),
+            labels: scalar_f.data.map((x) => x.name),
             datasets: [
               {
-                data: Object.values(scalar_f.data).map((x) => x.time),
+                data: scalar_f.data.map((x) => x.time),
                 label: "ForwardDiff.jl",
               },
               {
-                data: Object.values(scalar_t.data).map((x) => x.time),
+                data: scalar_t.data.map((x) => x.time),
                 label: "TaylorDiff.jl",
               },
             ],

@@ -1,65 +1,61 @@
 import { FunctionComponent, PropsWithChildren } from "react";
 import ProjectHeader from "@/components/ProjectHeader";
 import ContextNavigator from "@/components/ContextNavigator";
-import Switcher, { Mode } from "@/components/Switcher";
 import { MainWrapper } from "@/components/Layout";
 import { configureChartJS } from "@/utils/chart";
 import { useNavigate } from "react-router-dom";
+import { sortByDateDsc } from "@/utils/data";
 
 const isCommit = (id: string) => {
   return id.length == 40;
-}
+};
 
 configureChartJS();
 
-export default function SnapshotLayout({ name, id, Charts, data }: PropsWithChildren<{
-  name: string,
-  id: string,
-  Charts: FunctionComponent<{ suite: BenchmarkGroup }>,
-  data: BenchmarkData,
+export default function SnapshotLayout({
+  name,
+  id,
+  Charts,
+  data,
+}: PropsWithChildren<{
+  name: string;
+  id: string;
+  Charts: FunctionComponent<{ result: BenchmarkGroup[] }>;
+  data: Benchmark[];
 }>) {
   const navigate = useNavigate();
-  const epoch = (s: string) => new Date(s).getTime();
-  const sortByDate = (a: BenchmarkUpload, b: BenchmarkUpload) =>
-  epoch(b.context.datetime) - epoch(a.context.datetime);
-
-  const tagLookup = new Map<string, BenchmarkUpload>(
-    Object.values(data)
-      .filter((v) => v.context.tag)
-      .map((v) => [v.context.tag, v])
+  const tagLookup = new Map<string, Benchmark>(
+    data.filter((v) => v.tag).map((v) => [v.tag, v])
   );
-  const branchLookup = new Map<string, BenchmarkUpload[]>();
+  const branchLookup = new Map<string, Benchmark[]>();
   for (const v of Object.values(data)) {
-    if (!branchLookup.has(v.context.branch)) {
-      branchLookup.set(v.context.branch, []);
+    if (!branchLookup.has(v.branch)) {
+      branchLookup.set(v.branch, []);
     }
-    branchLookup.get(v.context.branch)!.push(v);
-    branchLookup.get(v.context.branch)!.sort(sortByDate);
+    branchLookup.get(v.branch)!.push(v);
+    branchLookup.get(v.branch)!.sort(sortByDateDsc);
   }
   const result = isCommit(id)
-    ? data[`${name}#${id}`]
+    ? data.find((v) => v.commit == id)!
     : branchLookup.get(id)![0];
-  const { tag, branch } = result.context;
+  const { tag, branch } = result;
   return (
     <>
       <ProjectHeader
         name={name}
         url="https://github.com/JuliaDiff/TaylorDiff.jl"
-      />
-      <Switcher
-        checked={false}
-        onCheckedChange={() => navigate(`/${name}/series`)}
+        mode="snapshot"
       />
       <ContextNavigator
         tag={tag}
         branch={branch}
-        commit={result.context.commit}
-        setCommit={s => navigate(`/${name}/commit/${s}`)}
+        commit={result.commit}
+        setCommit={(s) => navigate(`/${name}/commit/${s}`)}
         tagLookup={tagLookup}
         branchLookup={branchLookup}
       />
       <MainWrapper>
-        <Charts suite={result.suite} />
+        <Charts result={result.result} />
       </MainWrapper>
     </>
   );

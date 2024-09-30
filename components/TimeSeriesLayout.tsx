@@ -1,27 +1,26 @@
 import ProjectHeader from "@/components/ProjectHeader";
 import SeriesNavigator from "@/components/SeriesNavigator";
 import TimeSeries from "@/components/TimeSeries";
-import Switcher, { Mode } from "@/components/Switcher";
 import { MainWrapper } from "@/components/Layout";
 import { configureChartJS } from "@/utils/chart";
-import { sortByDateAsc, useBenchmarkData } from "@/utils/data";
+import { sortByDateAsc } from "@/utils/data";
 import { useNavigate } from "react-router-dom";
 
 configureChartJS();
 
-const preprocessData = (data: BenchmarkData) => {
-  const sorted = Object.values(data).sort(sortByDateAsc);
+const preprocessData = (data: Benchmark[]) => {
+  const sorted = data.sort(sortByDateAsc);
   (window as any).logging_sorted = sorted;
-  const tagLookup = new Map<string, BenchmarkUpload>(
-    sorted.filter((v) => v.context.tag).map((v) => [v.context.tag, v])
+  const tagLookup = new Map<string, Benchmark>(
+    sorted.filter((v) => v.tag).map((v) => [v.tag, v])
   );
   const tagged = Array.from(tagLookup.values());
-  const branchLookup = new Map<string, BenchmarkUpload[]>();
+  const branchLookup = new Map<string, Benchmark[]>();
   for (const v of sorted) {
-    if (!branchLookup.has(v.context.branch)) {
-      branchLookup.set(v.context.branch, []);
+    if (!branchLookup.has(v.branch)) {
+      branchLookup.set(v.branch, []);
     }
-    branchLookup.get(v.context.branch)!.push(v);
+    branchLookup.get(v.branch)!.push(v);
   }
   return { tagLookup, tagged, branchLookup };
 };
@@ -33,8 +32,8 @@ const Content = ({
   handler,
 }: {
   series: string;
-  tagged: BenchmarkUpload[];
-  branchLookup: Map<string, BenchmarkUpload[]>;
+  tagged: Benchmark[];
+  branchLookup: Map<string, Benchmark[]>;
   handler: (s: string) => void;
 }) => {
   return (
@@ -60,7 +59,7 @@ export default function TimeSeriesLayout({
 }: {
   name: string;
   series: string;
-  data: BenchmarkData
+  data: Benchmark[]
 }) {
   const navigate = useNavigate();
   const handler = (s: string) => navigate(`/${name}/series/${s}`);
@@ -69,10 +68,7 @@ export default function TimeSeriesLayout({
       <ProjectHeader
         name={name}
         url="https://github.com/JuliaDiff/TaylorDiff.jl"
-      />
-      <Switcher
-        checked={true}
-        onCheckedChange={() => navigate(`/${name}/`)}
+        mode="series"
       />
       {data ? (
         <Content series={series} handler={handler} {...preprocessData(data)} />

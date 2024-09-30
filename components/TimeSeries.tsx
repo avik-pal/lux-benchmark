@@ -7,7 +7,7 @@ import TagList from "./TagList";
 import TimeSeriesChart from "./TimeSeriesChart";
 
 interface Props {
-  data: BenchmarkUpload[];
+  data: Benchmark[];
   filter?: (bc: string[]) => boolean;
 }
 
@@ -56,17 +56,20 @@ export default function TimeSeries({ data, filter }: Props) {
       lists.contexts.push(context);
       lists.series.push(thing);
     } else {
-      for (const [key, value] of Object.entries(thing.data)) {
-        breadcrumb.push(key);
+      for (const item of thing.data) {
+        const { name } = item;
+        breadcrumb.push(name);
         tags.push(...thing.tags);
-        visit(breadcrumb, tags, context, value);
+        visit(breadcrumb, tags, context, item);
         breadcrumb.pop();
         tags.splice(tags.length - thing.tags.length, thing.tags.length);
       }
     }
   };
-  for (const { context, suite } of data) {
-    visit([], [], context, suite);
+  for (const { result, ...context } of data) {
+    for (const group of result) {
+      visit([group.name], group.tags, context, group);
+    }
   }
 
   const allTags = new Set<string>();

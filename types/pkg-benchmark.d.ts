@@ -1,4 +1,5 @@
 interface TrialEstimate {
+  name: string;
   time: number;
   memory: number;
   allocs: number;
@@ -6,46 +7,33 @@ interface TrialEstimate {
 }
 
 interface BenchmarkGroup {
+  name: string;
   tags: string[];
-  data: {
-    [key: string]: TrialEstimate | BenchmarkGroup;
-  };
+  data: (TrialEstimate | BenchmarkGroup)[];
 }
 
 interface G0 {
   tags: string[];
-  data: {
-    [key: string]: TrialEstimate;
-  };
+  data: TrialEstimate[];
 }
 
 interface G1 {
   tags: string[];
-  data: {
-    [key: string]: G0;
-  };
+  data: G0[];
 }
 
 interface G2 {
   tags: string[];
-  data: {
-    [key: string]: G1;
-  };
+  data: G1[];
 }
 
-interface BenchmarkContext {
+interface Benchmark {
   datetime: string;
   commit: string;
   branch: string;
   tag: string;
-}
-
-interface BenchmarkUpload {
   config: Record<string, unknown>;
-  context: BenchmarkContext;
-  suite: BenchmarkGroup;
+  result: BenchmarkGroup[];
 }
 
-interface BenchmarkData {
-  [key: string]: BenchmarkUpload;
-}
+type BenchmarkContext = Pick<Benchmark, "branch" | "commit" | "tag">;

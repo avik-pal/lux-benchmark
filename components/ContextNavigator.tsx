@@ -6,8 +6,8 @@ interface ContextProps {
   branch: string;
   commit: string;
   setCommit: (s: string) => void;
-  tagLookup: Map<string, BenchmarkUpload>;
-  branchLookup: Map<string, BenchmarkUpload[]>;
+  tagLookup: Map<string, Benchmark>;
+  branchLookup: Map<string, Benchmark[]>;
 }
 
 const Wrapper = styled.div`
@@ -29,20 +29,20 @@ export default function ContextNavigator({
       <ContextPicker
         name="Tag"
         current={tag}
-        handler={(t) => t && setCommit(tagLookup.get(t)!.context.commit)}
+        handler={(t) => t && setCommit(tagLookup.get(t)!.commit)}
         options={Array.from(tagLookup.keys()).concat([""])}
       />
       <ContextPicker
         name="Branch"
         current={branch}
-        handler={(b) => setCommit(branchLookup.get(b)![0].context.commit)}
+        handler={(b) => setCommit(branchLookup.get(b)![0].commit)}
         options={Array.from(branchLookup.keys())}
       />
       <ContextPicker
         name="Commit"
         current={commit}
         handler={setCommit}
-        options={branchLookup.get(branch)!.map((v) => v.context.commit)}
+        options={branchLookup.get(branch)!.map((v) => v.commit)}
         displayOption={(x) => x.slice(0, 7)}
       />
     </Wrapper>

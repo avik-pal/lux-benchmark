@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { PropsWithChildren } from "react";
+import { Form } from "react-bootstrap";
 
 const Wrapper = styled.div`
   display: flex;
@@ -23,19 +23,19 @@ export default function ContextPicker({
   handler,
   options,
   displayOption,
-  children,
-}: PropsWithChildren<{
+}: {
   name: string;
   current: string;
   handler: (s: string) => void;
   options: string[];
   displayOption?: (s: string) => string;
-}>) {
+}) {
   return (
     <Wrapper>
       <span>{name}</span>
-      <select
-        name={name}
+      <Form.Select
+        name="context"
+        title={name}
         value={current}
         onChange={(event) => handler(event.target.value)}
       >
@@ -44,7 +44,7 @@ export default function ContextPicker({
             {displayOption ? displayOption(o) : o}
           </option>
         ))}
-      </select>
+      </Form.Select>
     </Wrapper>
   );
 }
