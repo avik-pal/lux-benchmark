@@ -36,4 +36,6 @@ interface Benchmark {
   result: BenchmarkGroup[];
 }
 
-type BenchmarkContext = Pick<Benchmark, "branch" | "commit" | "tag">;
+type BenchmarkContext = Pick<Benchmark, "branch" | "commit" | "tag" | "datetime">;
+
+type SnapshotSpecifier = {} | { branch: string } | { commit: string } | { tag: string };

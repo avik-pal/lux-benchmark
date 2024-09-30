@@ -14,12 +14,12 @@ configureChartJS();
 
 export default function SnapshotLayout({
   name,
-  id,
+  specifier,
   Charts,
   data,
 }: PropsWithChildren<{
   name: string;
-  id: string;
+  specifier: SnapshotSpecifier;
   Charts: FunctionComponent<{ result: BenchmarkGroup[] }>;
   data: Benchmark[];
 }>) {
@@ -35,9 +35,17 @@ export default function SnapshotLayout({
     branchLookup.get(v.branch)!.push(v);
     branchLookup.get(v.branch)!.sort(sortByDateDsc);
   }
-  const result = isCommit(id)
-    ? data.find((v) => v.commit == id)!
-    : branchLookup.get(id)![0];
+  const result =
+    "commit" in specifier
+      ? data.find((v) => v.commit == specifier.commit)
+      : "branch" in specifier
+      ? branchLookup.get(specifier.branch)?.[0]
+      : "tag" in specifier
+      ? tagLookup.get(specifier.tag)
+      : branchLookup.get("main")?.[0];
+  if (!result) {
+    return <div>Not found</div>;
+  }
   const { tag, branch } = result;
   return (
     <>
@@ -50,7 +58,7 @@ export default function SnapshotLayout({
         tag={tag}
         branch={branch}
         commit={result.commit}
-        setCommit={(s) => navigate(`/${name}/commit/${s}`)}
+        navigate={(s) => navigate(`/${name}` + s)}
         tagLookup={tagLookup}
         branchLookup={branchLookup}
       />

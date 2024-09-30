@@ -1,15 +1,9 @@
 const host = "https://benchmark-data.tansongchen.workers.dev/";
 
-async function get<T>(key: string) {
-  const response = await fetch(key);
-  const data = await response.json();
-  return data as T;
-}
-
 export async function getBenchmark(key: string) {
   const response = await fetch(host + key);
-  const data = await response.json();
-  return data as Benchmark[];
+  const data = (await response.json()) as Benchmark[];
+  return data.sort(sortByDateDsc);
 }
 
 const epoch = (s: string) => new Date(s).getTime();

@@ -31,5 +31,5 @@ export const configureChartJS = () => {
 
   Chart.defaults.aspectRatio = 1.2;
   Chart.defaults.plugins.title.display = true;
-  (Chart.defaults.plugins.title.font as FontSpec).size = 20;
+  (Chart.defaults.plugins.title.font as FontSpec).size = 16;
 };

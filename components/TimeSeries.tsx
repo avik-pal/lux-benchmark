@@ -1,15 +1,9 @@
-"use client";
-
 import { useState } from "react";
 import styled from "styled-components";
 import ChartsContainer from "./ChartsContainer";
 import TagList from "./TagList";
 import TimeSeriesChart from "./TimeSeriesChart";
-
-interface Props {
-  data: Benchmark[];
-  filter?: (bc: string[]) => boolean;
-}
+import SeriesNavigator from "./SeriesNavigator";
 
 function isLeaf(thing: BenchmarkGroup | TrialEstimate): thing is TrialEstimate {
   return "time" in thing;
@@ -26,7 +20,18 @@ const TagListLabel = styled.label`
   padding-right: 16px;
 `;
 
-export default function TimeSeries({ data, filter }: Props) {
+export default function TimeSeries({
+  series,
+  tagged,
+  branchLookup,
+  handler,
+}: {
+  series: string;
+  tagged: Benchmark[];
+  branchLookup: Map<string, Benchmark[]>;
+  handler: (s: string) => void;
+}) {
+  const data = series === "tagged" ? tagged : branchLookup.get(series)!;
   const [selectedTags, setSelectedTags] = useState(new Set<string>());
   const breadcrumbMap = new Map<
     string,
@@ -44,7 +49,6 @@ export default function TimeSeries({ data, filter }: Props) {
     thing: BenchmarkGroup | TrialEstimate
   ) => {
     if (isLeaf(thing)) {
-      if (filter && !filter(breadcrumb)) return;
       const path = breadcrumb.join(".");
       if (!breadcrumbMap.has(path)) {
         breadcrumbMap.set(path, { tags: new Set(), contexts: [], series: [] });
@@ -67,9 +71,7 @@ export default function TimeSeries({ data, filter }: Props) {
     }
   };
   for (const { result, ...context } of data) {
-    for (const group of result) {
-      visit([group.name], group.tags, context, group);
-    }
+    visit([], [], context, { name: "", tags: [], data: result });
   }
 
   const allTags = new Set<string>();
@@ -87,14 +89,21 @@ export default function TimeSeries({ data, filter }: Props) {
 
   return (
     <>
-      <TagListWrapper>
-        <TagListLabel>Filter by tags: </TagListLabel>
-        <TagList
-          tags={Array.from(allTags).sort()}
-          toggleTag={toggleTag}
-          selectedTags={selectedTags}
+      <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+        <SeriesNavigator
+          allSeries={Array.from(branchLookup.keys()).concat(["tagged"])}
+          series={series}
+          handler={handler}
         />
-      </TagListWrapper>
+        <TagListWrapper>
+          <TagListLabel>Filter by tags: </TagListLabel>
+          <TagList
+            tags={Array.from(allTags).sort()}
+            toggleTag={toggleTag}
+            selectedTags={selectedTags}
+          />
+        </TagListWrapper>
+      </div>
       <ChartsContainer>
         {Array.from(breadcrumbMap.entries())
           .filter(([breadcrumb, v]) => {

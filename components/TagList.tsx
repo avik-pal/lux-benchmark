@@ -1,3 +1,4 @@
+import { Badge } from "react-bootstrap";
 import styled from "styled-components";
 
 const Wrapper = styled.ul`
@@ -6,20 +7,7 @@ const Wrapper = styled.ul`
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-`;
-
-const Tag = styled.li<{ active: boolean }>`
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background-color: ${(p) =>
-    p.active ? "hsl(230deg 20% 75%)" : "hsl(230deg 20% 90%)"};
-  color: hsl(240deg 70% 30%);
-  font-size: 0.875rem;
-
-  &:hover {
-    background-color: hsl(230deg 20% 75%);
-  }
+  margin: 0;
 `;
 
 export default function TagList({
@@ -34,9 +22,9 @@ export default function TagList({
   return (
     <Wrapper>
       {tags.map((x) => (
-        <Tag key={x} onClick={() => toggleTag(x)} active={selectedTags.has(x)}>
+        <Badge key={x} onClick={() => toggleTag(x)} bg={selectedTags.has(x) ? "primary" : "secondary"}>
           {x}
-        </Tag>
+        </Badge>
       ))}
     </Wrapper>
   );

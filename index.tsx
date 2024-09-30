@@ -2,10 +2,10 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import GlobalStyles from "./components/GlobalStyles";
-import Commit, { loaderCommit, loaderHome } from "./pages/commit";
+import Snapshot, { loaderSnapshot } from "./pages/snapshot";
 import ErrorPage from "./pages/error";
 import Index from "./pages/index";
-import Project, { loaderDefault, loaderSeries } from "./pages/project";
+import Series, { loaderDefault, loaderSeries } from "./pages/series";
 
 const router = createBrowserRouter([
   {
@@ -15,33 +15,39 @@ const router = createBrowserRouter([
   },
   {
     path: "/:name",
-    element: <Project />,
+    element: <Snapshot />,
     errorElement: <ErrorPage />,
-    loader: loaderDefault,
+    loader: loaderSnapshot,
+  },
+  {
+    path: "/:name/commit/:commit",
+    element: <Snapshot />,
+    errorElement: <ErrorPage />,
+    loader: loaderSnapshot,
+  },
+  {
+    path: "/:name/tag/:tag",
+    element: <Snapshot />,
+    errorElement: <ErrorPage />,
+    loader: loaderSnapshot,
+  },
+  {
+    path: "/:name/branch/:branch",
+    element: <Snapshot />,
+    errorElement: <ErrorPage />,
+    loader: loaderSnapshot,
   },
   {
     path: "/:name/series",
-    element: <Project />,
+    element: <Series />,
     errorElement: <ErrorPage />,
     loader: loaderDefault,
   },
   {
     path: "/:name/series/:series",
-    element: <Project />,
+    element: <Series />,
     errorElement: <ErrorPage />,
     loader: loaderSeries,
-  },
-  {
-    path: "/:name/commit/:commit",
-    element: <Commit />,
-    errorElement: <ErrorPage />,
-    loader: loaderCommit,
-  },
-  {
-    path: "/TaylorDiff.jl",
-    element: <Commit />,
-    errorElement: <ErrorPage />,
-    loader: loaderHome("TaylorDiff.jl", "main"),
   },
 ]);
 

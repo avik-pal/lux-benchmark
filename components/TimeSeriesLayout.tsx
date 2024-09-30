@@ -1,5 +1,4 @@
 import ProjectHeader from "@/components/ProjectHeader";
-import SeriesNavigator from "@/components/SeriesNavigator";
 import TimeSeries from "@/components/TimeSeries";
 import { MainWrapper } from "@/components/Layout";
 import { configureChartJS } from "@/utils/chart";
@@ -25,33 +24,6 @@ const preprocessData = (data: Benchmark[]) => {
   return { tagLookup, tagged, branchLookup };
 };
 
-const Content = ({
-  series,
-  tagged,
-  branchLookup,
-  handler,
-}: {
-  series: string;
-  tagged: Benchmark[];
-  branchLookup: Map<string, Benchmark[]>;
-  handler: (s: string) => void;
-}) => {
-  return (
-    <>
-      <SeriesNavigator
-        allSeries={Array.from(branchLookup.keys()).concat(["tagged"])}
-        series={series}
-        handler={handler}
-      />
-      <MainWrapper>
-        <TimeSeries
-          data={series === "tagged" ? tagged : branchLookup.get(series)!}
-        />
-      </MainWrapper>
-    </>
-  );
-};
-
 export default function TimeSeriesLayout({
   name,
   series,
@@ -71,7 +43,7 @@ export default function TimeSeriesLayout({
         mode="series"
       />
       {data ? (
-        <Content series={series} handler={handler} {...preprocessData(data)} />
+        <TimeSeries series={series} handler={handler} {...preprocessData(data)} />
       ) : (
         <MainWrapper>Loading...</MainWrapper>
       )}

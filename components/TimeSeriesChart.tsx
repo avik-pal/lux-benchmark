@@ -11,7 +11,6 @@ import {
   Title,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import styled from "styled-components";
 
 import ChartWrapper from "./ChartWrapper";
 import TagList from "./TagList";
@@ -71,6 +70,16 @@ export default function TimeSeriesChart({
           },
           plugins: {
             title: { text: slug, display: true },
+            tooltip: {
+              callbacks: {
+                footer: (items) => {
+                  const context = contexts[items[0].dataIndex];
+                  return [
+                    `Date: ${new Date(context.datetime).toLocaleDateString()}`,
+                  ];
+                },
+              },
+            },
           },
         }}
       />
