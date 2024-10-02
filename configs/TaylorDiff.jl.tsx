@@ -1,6 +1,7 @@
 import ChartsContainer from "@/components/ChartsContainer";
 import ChartWrapper from "@/components/ChartWrapper";
 import { Bar, Line } from "react-chartjs-2";
+import { sortBy } from "lodash";
 
 export function Charts({ result }: { result: BenchmarkGroup[] }) {
   const [pinn, mlp, scalar, taylor_expansion] = result;
@@ -8,6 +9,10 @@ export function Charts({ result }: { result: BenchmarkGroup[] }) {
   const [mlp_f, mlp_t] = (mlp as G1).data;
   const [te_t, te_s] = (taylor_expansion as G0).data;
   const [pinn_t, pinn_f] = (pinn as G1).data;
+  scalar_f.data = sortBy(scalar_f.data, "name");
+  scalar_t.data = sortBy(scalar_t.data, "name");
+  mlp_f.data = sortBy(mlp_f.data, "name");
+  mlp_t.data = sortBy(mlp_t.data, "name");
   return (
     <ChartsContainer>
       <ChartWrapper url="https://github.com/JuliaDiff/TaylorDiff.jl/blob/main/benchmark/scalar.jl">
@@ -104,7 +109,7 @@ export function Charts({ result }: { result: BenchmarkGroup[] }) {
       <ChartWrapper url="https://github.com/JuliaDiff/TaylorDiff.jl/blob/main/benchmark/pinn.jl">
         <Bar
           data={{
-            labels: Object.keys(pinn_f.data),
+            labels: pinn_f.data.map((x) => x.name),
             datasets: [
               {
                 data: Object.values(pinn_f.data).map((x) => x.time / 1000),

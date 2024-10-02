@@ -2,27 +2,10 @@ import ProjectHeader from "@/components/ProjectHeader";
 import TimeSeries from "@/components/TimeSeries";
 import { MainWrapper } from "@/components/Layout";
 import { configureChartJS } from "@/utils/chart";
-import { sortByDateAsc } from "@/utils/data";
 import { useNavigate } from "react-router-dom";
+import { preprocessData } from "@/utils/data";
 
 configureChartJS();
-
-const preprocessData = (data: Benchmark[]) => {
-  const sorted = data.sort(sortByDateAsc);
-  (window as any).logging_sorted = sorted;
-  const tagLookup = new Map<string, Benchmark>(
-    sorted.filter((v) => v.tag).map((v) => [v.tag, v])
-  );
-  const tagged = Array.from(tagLookup.values());
-  const branchLookup = new Map<string, Benchmark[]>();
-  for (const v of sorted) {
-    if (!branchLookup.has(v.branch)) {
-      branchLookup.set(v.branch, []);
-    }
-    branchLookup.get(v.branch)!.push(v);
-  }
-  return { tagLookup, tagged, branchLookup };
-};
 
 export default function TimeSeriesLayout({
   name,

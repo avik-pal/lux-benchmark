@@ -31,7 +31,7 @@ interface Benchmark {
   datetime: string;
   commit: string;
   branch: string;
-  tag: string;
+  tag?: string;
   config: Record<string, unknown>;
   result: BenchmarkGroup[];
 }

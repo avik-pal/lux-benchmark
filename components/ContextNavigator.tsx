@@ -2,9 +2,10 @@ import styled from "styled-components";
 import ContextPicker from "./ContextPicker";
 
 interface ContextProps {
-  tag: string;
+  tag?: string;
   branch: string;
   commit: string;
+  datetime: string;
   navigate: (s: string) => void;
   tagLookup: Map<string, Benchmark>;
   branchLookup: Map<string, Benchmark[]>;
@@ -20,15 +21,17 @@ export default function ContextNavigator({
   tag,
   branch,
   commit,
+  datetime,
   navigate,
   tagLookup,
   branchLookup,
 }: ContextProps) {
+  const branchSeries = branchLookup.get(branch)!;
   return (
     <Wrapper>
       <ContextPicker
         name="Tag"
-        current={tag}
+        current={tag || ""}
         handler={(t) => t && navigate(`/tag/${t}`)}
         options={Array.from(tagLookup.keys()).concat([""])}
       />
@@ -42,8 +45,13 @@ export default function ContextNavigator({
         name="Commit"
         current={commit}
         handler={(c) => navigate(`/commit/${c}`)}
-        options={branchLookup.get(branch)!.map((v) => v.commit)}
-        displayOption={(x) => x.slice(0, 7)}
+        options={branchSeries.map((v) => v.commit).reverse()}
+        displayOption={(x) => {
+          const datetime = branchSeries.find((v) => v.commit == x)!.datetime;
+          const local = new Date(datetime + "Z").toLocaleString();
+          const short = x.slice(0, 7);
+          return `${short} (${local})`;
+        }}
       />
     </Wrapper>
   );
